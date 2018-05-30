@@ -42,6 +42,7 @@ extern "C" {
 #endif
 
 #include "TinyWebServer.h"
+#include <stdarg.h>
 
 // Temporary buffer.
 static char buffer[160];
@@ -691,6 +692,46 @@ boolean put_handler(TinyWebServer& web_server) {
 }
 
 };
+
+size_t TinyWebServer::printf(const char* format, ...)
+{
+    char buffer[256];
+    va_list args;
+    va_start(args, format);
+    size_t N = vsnprintf(buffer, 256, format, args);
+    print(buffer);
+    va_end(args);
+    return N;
+}
+
+size_t TinyWebServer::printfln(const char* format, ...)
+{
+    char buffer[256];
+    va_list args;
+    va_start(args, format);
+    size_t N = vsnprintf(buffer, 256, format, args);
+    println(buffer);
+    va_end(args);
+    return N;
+}
+
+/*const char* TinyWebServer::getCookieValue(const char* token) {
+    const char* cookie = get_header_value("Cookie");
+    if(cookie == NULL) return NULL;
+    char* name = NULL;
+    char* value = NULL;
+
+    char* v = strtok(cookie, "; ");
+    while(v != NULL) {
+        if(strncmp(v, token, strlen(token))) {
+            return strchr(v, '=');
+        }
+        v = strtok(NULL, "; ");
+    }
+    return NULL;
+}
+*/
+
 const char* getNextKey(const char* text) {
     const char* k = strchr(text, '?');
     if (k == NULL) return strchr(text, '&');

@@ -200,6 +200,8 @@ private:
   boolean is_requested_header(const char** header);
 
   boolean assign_header_value(const char* header, char* value);
+
+//  const char* getCookieValue(const char*);
 };
 
 #ifdef GLOB_MATCH
