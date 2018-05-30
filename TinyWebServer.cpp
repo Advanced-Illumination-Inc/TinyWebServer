@@ -36,8 +36,10 @@ extern "C" {
 }
 
 #include <Ethernet.h>
-#include <Flash.h>
+#include "Flash.h"
+#ifdef _USE_SD_CARD
 #include <SD.h>
+#endif
 
 #include "TinyWebServer.h"
 
@@ -496,6 +498,7 @@ TinyWebServer::MimeType TinyWebServer::get_mime_type_from_filename(
   return r;
 }
 
+#ifdef _USE_SD_CARD
 void TinyWebServer::send_file(SdFile& file) {
   size_t size;
   while ((size = file.read(buffer, sizeof(buffer))) > 0) {
@@ -505,6 +508,7 @@ void TinyWebServer::send_file(SdFile& file) {
     write((uint8_t*)buffer, size);
   }
 }
+#endif
 
 size_t TinyWebServer::write(uint8_t c) {
   client_.write(c);

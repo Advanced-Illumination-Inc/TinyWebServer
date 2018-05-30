@@ -12,7 +12,9 @@
 
 #include <Print.h>
 
+#ifdef _USE_SD_CARD
 class SdFile;
+#endif
 class TinyWebServer;
 
 namespace TinyWebPutHandler {
@@ -130,12 +132,14 @@ public:
   // could be guessed, the equivalent of text/html is returned.
   static MimeType get_mime_type_from_filename(const char* filename);
 
+#ifdef _USE_SD_CARD
   // Sends the contents of `file' to the currently connected
   // client. The file must be opened in read mode.
   //
   // This is mainly an optimization to reuse the internal static
   // buffer used by this class, which saves us some RAM.
   void send_file(SdFile& file);
+#endif
 
   // These methods write directly in the response stream of the
   // connected client
