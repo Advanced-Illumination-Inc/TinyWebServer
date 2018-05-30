@@ -156,6 +156,11 @@ public:
   // if the character could be read, false otherwise.
   virtual boolean read_next_char(Client& client, uint8_t* ch);
 
+  size_t printf(const char*, ...);
+  size_t printfln(const char*, ...);
+
+  //Copies value of a URL query parameter to the given buffer.
+  size_t get_query(const char*, char*, size_t);
  protected:
   // Returns the field number `which' from buffer. Fields are
   // separated by spaces. Should be a private method, but made public
@@ -178,6 +183,7 @@ private:
   EthernetServer server_;
 
   char* path_;
+  char* query_ = NULL;
   HttpRequestType request_type_;
   EthernetClient client_;
 

@@ -265,6 +265,12 @@ void TinyWebServer::process() {
   }
   
   path_ = get_field(buffer, 1);
+  char* question = strchr(buffer, '?');
+  if (question != NULL) {
+      size_t queryLen = strchr(question, ' ') - question;
+      query_ = (char*)malloc(queryLen);
+      memcpy(query_, question, queryLen);
+  }
 
   // Process the headers.
   if (!process_headers()) {
@@ -302,6 +308,10 @@ void TinyWebServer::process() {
   }
 
   free(path_);
+  if (query_ != NULL) {
+      free(query_);
+      query_ = NULL;
+  }
   free(request_type_str);
 }
 
@@ -581,7 +591,7 @@ char* TinyWebServer::get_field(const char* buffer, int which) {
   if (field_no == which && i < size) {
     // Now identify where the field ends.
     int j = i;
-    while (j < size && !isspace(buffer[j])) {
+    while (j < size && !isspace(buffer[j]) && (buffer[j] != '?')) {
       j++;
     }
 
@@ -664,3 +674,28 @@ boolean put_handler(TinyWebServer& web_server) {
 }
 
 };
+const char* getNextKey(const char* text) {
+    const char* k = strchr(text, '?');
+    if (k == NULL) return strchr(text, '&');
+}
+
+size_t TinyWebServer::get_query(const char* key, char* val, size_t maxLen) {
+    if (query_ == NULL) return 0;
+    const char* keyNext = query_;
+    while (keyNext != NULL)
+    {
+        keyNext = getNextKey(keyNext);
+        if (keyNext == NULL) return 0;
+        if (strstr(keyNext + 1, key) == keyNext + 1) {
+            const char* eq = strchr(keyNext, '=');
+            const char* end = getNextKey(eq);
+            if (end == NULL) end = eq + strlen(eq);
+            size_t len = min(end - eq - 1, maxLen);
+            memcpy(val, eq + 1, len);
+            return len;
+        }
+        else {
+            keyNext++;
+        }
+    }
+}
