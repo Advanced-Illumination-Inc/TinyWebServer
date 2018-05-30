@@ -17,6 +17,15 @@ The library is licensed under the terms of LGPL 2.1. Which means
 you're free to use it in your projects (including commercial ones) as
 long as you're sending back the changes you make to the library.
 
+Changes in this fork
+====================
+- SD cards moved behind `ifdef`s. 
+- Added URL query parsing. 
+- Added Ozan S. Yigit's public domain glob code for improved path matching. 
+- Use `strcasecmp` for header names when available. This can be improved to use its own preprocessor symbol for ifdefing.
+- Added printf convenience functions (simple wrappers around sprintf). Arduino streams should probably have these anyway...
+- Added better HTTP response messages (reason phrases) for a subset of error codes. 
+
 External dependencies
 ====================
 
@@ -312,3 +321,14 @@ end of the IR learning procedure. Since the Ethernet shield only
 allows for 4 maximum HTTP clients open at the same time (because of 4
 maximum client sockets), in my application I allow only one /learn
 handler to be active at any given time.
+
+URL Query Parameters
+====================
+
+This branch of code features support for URL query parameters. For example, if a client navigates to
+`/path/to/thing?key=value`, then get_path() will return `"/path/to/thing"`, doing something like
+
+    char temp[16];
+    client.get_query("key", temp, 15);
+
+Will fill the array `temp` with `value`. 
