@@ -10,6 +10,8 @@
 #ifndef __WEB_SERVER_H__
 #define __WEB_SERVER_H__
 
+#define GLOB_MATCH
+
 #include <Print.h>
 
 #ifdef _USE_SD_CARD
@@ -199,5 +201,9 @@ private:
 
   boolean assign_header_value(const char* header, char* value);
 };
+
+#ifdef GLOB_MATCH
+int amatch(const char*, const char*);
+#endif
 
 #endif /* __WEB_SERVER_H__ */
