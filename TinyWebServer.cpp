@@ -371,7 +371,34 @@ void TinyWebServer::send_error_code(Client& client, int code) {
 #endif
   client << F("HTTP/1.1 ");
   client.print(code, DEC);
-  client << F(" OK\r\n");
+  switch(code) {
+      case 200:
+    client << F(" OK\r\n");
+    break;
+      case 204:
+          client << F(" No Content\r\n");
+          break;
+      case 400:
+          client << F(" Bad Request\r\n");
+          break;
+      case 401:
+          client << F(" Unauthorized\r\n");
+          break;
+      case 403:
+          client << F(" Forbidden\r\n");
+      case 404:
+          client << F(" Not Found\r\n");
+          break;
+      case 500:
+          client << F(" Internal Server Error\r\n");
+          break;
+      case 501:
+          client << F(" Not Implemented\r\n");
+          break;
+      default:
+          client << F(" OK\r\n");
+  }
+  
   if (code != 200) {
     end_headers(client);
   }
