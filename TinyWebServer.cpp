@@ -81,7 +81,11 @@ TinyWebServer::TinyWebServer(PathHandler handlers[],
     server_(EthernetServer(port)),
     path_(NULL),
     request_type_(UNKNOWN_REQUEST),
+#ifdef __TM4C1294NCPDT__
+    client_(EthernetClient(/*255*/)) {//I hope that 255 isn't important
+#else
     client_(EthernetClient(255)) {
+#endif
   if (headers) {
     int size = 0;
     for (int i = 0; headers[i]; i++) {
@@ -324,7 +328,11 @@ boolean TinyWebServer::is_requested_header(const char** header) {
     return false;
   }
   for (int i = 0; headers_[i].header; i++) {
+#ifdef __TM4C1294NCPDT__
+    if (!strcasecmp(*header, headers_[i].header)) {
+#else
     if (!strcmp(*header, headers_[i].header)) {
+#endif
       *header = headers_[i].header;
       return true;
     }
@@ -396,7 +404,12 @@ const char* TinyWebServer::get_header_value(const char* name) {
     return NULL;
   }
   for (int i = 0; headers_[i].header; i++) {
+  #ifdef __TM4C1294NCPDT__
+    if (!strcasecmp(headers_[i].header, name)) {
+  #else
+  #pragma warning "Headers are case-sensitive!"
     if (!strcmp(headers_[i].header, name)) {
+    #endif
       return headers_[i].value;
     }
   }
