@@ -180,6 +180,14 @@ private:
 
   // The headers
   HeaderValue* headers_;
+  
+  typedef struct {
+      const char* key;
+      char* value;
+  } QueryValue;
+  
+  QueryValue* queries_;
+  size_t NQueries;
 
   // The TCP/IP server we use.
   EthernetServer server_;

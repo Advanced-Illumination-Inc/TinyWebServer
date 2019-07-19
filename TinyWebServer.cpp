@@ -776,7 +776,15 @@ size_t TinyWebServer::get_query(const char* key, char* val, size_t maxLen) {
             const char* end = getNextKey(eq);
             if (end == NULL) end = eq + strlen(eq);
             size_t len = min(end - eq - 1, maxLen);
-            memcpy(val, eq + 1, len);
+            //Dumb memory juggling
+            char* temp = new char[len+1];
+            memset(temp, 0, len+1);
+            memcpy(temp, eq + 1, len);
+            char* derp = decode_url_encoded(temp);
+            strncpy(val, temp, maxLen);
+            free(derp);
+            delete[] temp;
+            //End of dumb memory juggling
             return len;
         }
         else {
@@ -784,6 +792,78 @@ size_t TinyWebServer::get_query(const char* key, char* val, size_t maxLen) {
         }
     }
 }
+
+void fill_queries(const char* query_source)
+{
+    if (NQueries > 0) {
+        // First clear the header values from the previous HTTP request.
+        for (int i = 0; i < NQueries; i++) {
+            free(queries_[i].key);
+            free(queries_[i].value);
+        }
+        free(queries_);
+    }
+    
+    
+    if (query_ == NULL) return 0;
+    const char* keyNext = query_;
+    
+    int keyCount = 0;
+    for(int i = 0; i < strlen(query_); i++)
+    {
+        if((query_[i] == '?') || (query_[i] == '&')) keyCount++;
+    }
+    if(keyCount <= 0) return;
+    if(keyCount > 16) return; //Set a sane limit
+    NQueries = keyCount;
+    queries_ = malloc_check(NQueries*sizeof(QueryValue));
+    
+    int atQuery = 0;
+    char kvbuf[64];
+    memset(kvbuf, 0, 64);
+    
+    while (keyNext != NULL)
+    {
+        keyNext = getNextKey(keyNext);
+        if (keyNext == NULL) return 0;
+
+        const char* eq = strchr(keyNext, '=');
+        const char* end = getNextKey(eq);
+        if (end == NULL) end = eq + strlen(eq);
+        size_t len = min(end - eq - 1, 63);
+        
+        memcpy(kvbuf, keyNext+1, eq-keyNext+1);
+        queries_[atQuery].key = decode_url_encoded(kvbuf);
+        memset(kvbuf, 0, 64);
+        memcpy(kvbuf, eq+1, len);
+        queries_[atQuery].value = decode_url_encoded(kvbuf);
+        memset(kvbuf, 0, 64);
+        
+        /*
+        //Dumb memory juggling
+        char* temp = new char[len+1];
+        memset(temp, 0, len+1);
+        memcpy(temp, eq + 1, len);
+        char* derp = decode_url_encoded(temp);
+        strncpy(val, temp, maxLen);
+        free(derp);
+        delete[] temp;
+        //End of dumb memory juggling
+        */
+        atQuery++;
+        keyNext = getNextKey(eq+1);
+        
+    }
+}
+
+const char* TinyWebServer::getQuery2(const char* key)
+{
+    for(int i = 0; i < NQueries; i++) {
+        if(strcmp(queries_[i].key, key) == 0) return queries_[i].value;
+    }
+    return NULL;
+}
+
 #ifdef GLOB_MATCH
 /*
  * robust glob pattern matcher
